@@ -1,0 +1,65 @@
+from tkinter import *
+import mysql.connector
+from tkinter import messagebox
+
+try:
+    con = mysql.connector.connect(
+         host="localhost",
+         user="root",
+         password="hits1234",
+         database="india"
+    )
+    cur = con.cursor()
+except Exception as e:
+    print(f"Database Connection Error: {e}")
+    con, cur = None, None
+
+def add():
+    if not con:
+        messagebox.showerror("Error", "Database not connected")
+        return
+    try:
+        cur.execute("insert into score values(%s,%s)", (e1.get(), e2.get()))
+        con.commit()
+        e1.delete(0, END)
+        e2.delete(0, END)
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def avg():
+    if not con:
+        messagebox.showerror("Error", "Database not connected")
+        return
+    try:
+        cur.execute("select avg(mark) from s")
+        a = cur.fetchone()
+        if a and a[0] is not None:
+            l4.config(text="average = %.2f" % a[0])
+        else:
+            l4.config(text="average = N/A")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+root = Tk()
+root.geometry("500x450")
+root.title("STUDENT MARKS")
+
+Label(root, text="NAME").pack()
+e1 = Entry(root)
+e1.pack()
+
+Label(root, text="MARK").pack()
+e2 = Entry(root)
+e2.pack()
+
+Button(root, text="ADD", command=add).pack()
+Button(root, text="SHOW AVG", command=avg).pack()
+
+l4 = Label(root, text="")
+l4.pack()
+
+root.mainloop()
+
+if con and con.is_connected():
+    cur.close()
+    con.close()
